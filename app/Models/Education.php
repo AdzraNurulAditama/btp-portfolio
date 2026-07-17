@@ -9,6 +9,9 @@ class Education extends Model
 {
     use HasFactory;
 
+    // Tambahkan baris ini untuk memaksa menunjuk ke tabel 'educations'
+    protected $table = 'educations';
+
     protected $fillable = [
         'institution',
         'degree',
