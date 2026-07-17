@@ -3,16 +3,16 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Layout; 
 use App\Models\Profile;
 use App\Models\Experience;
 use App\Models\Education;
 use App\Models\Project;
 use App\Models\Skill;
 
+#[Layout('layouts.app')] 
 class PortfolioManager extends Component
 {
-    // Set default layout for Livewire component to avoid using ->layout() in render
-    protected $layout = 'layouts.app';
     public $isEditMode = false;
 
     public $profileId;
@@ -52,13 +52,15 @@ class PortfolioManager extends Component
         ]);
 
         $profile = Profile::find($this->profileId);
-        $profile->update([
-            'name' => $this->name,
-            'headline' => $this->headline,
-            'about' => $this->about,
-            'email' => $this->email,
-            'phone' => $this->phone,
-        ]);
+        if ($profile) {
+            $profile->update([
+                'name' => $this->name,
+                'headline' => $this->headline,
+                'about' => $this->about,
+                'email' => $this->email,
+                'phone' => $this->phone,
+            ]);
+        }
 
         $this->isEditMode = false;
         
@@ -67,6 +69,7 @@ class PortfolioManager extends Component
 
     public function render()
     {
+        // 3. Bersih dari berisik Intelephense & method ->layout() sudah tidak dibutuhkan di sini
         return view('livewire.portfolio-manager', [
             'profile' => Profile::first(),
             'experiences' => Experience::latest()->get(),
