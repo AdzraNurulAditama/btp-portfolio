@@ -45,41 +45,68 @@
 
                 <!-- Kolom Form Konten Dashboard -->
                 <div class="lg:col-span-2 space-y-8">
-                    <!-- Form Data Diri -->
+<!-- Form Data Diri -->
 <section id="form-profile" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
     <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">📝 Ubah Data Diri</h3>
     
-    <!-- Tampilkan Notifikasi Sukses Jika Ada -->
     @if (session()->has('message'))
         <div class="mb-4 p-4 bg-emerald-50 text-emerald-700 text-sm rounded-xl">
             {{ session('message') }}
         </div>
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Bungkus dengan tag form dan tambahkan wire:submit serta enctype -->
+    <form wire:submit.prevent="saveProfile" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Baris Input File / Avatar -->
+        <div class="md:col-span-2 flex items-center gap-6 bg-gray-50 p-4 rounded-xl mb-2">
+            <div class="w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex-shrink-0 border relative">
+                @if ($newAvatar)
+                    <img src="{{ $newAvatar->temporaryUrl() }}" class="w-full h-full object-cover">
+                @elseif ($avatar)
+                    <img src="{{ asset('storage/' . $avatar) }}" class="w-full h-full object-cover">
+                @else
+                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Photo</div>
+                @endif
+                
+                <!-- Indikator Loading Saat File Diunggah -->
+                <div wire:loading wire:target="newAvatar" class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span class="text-white text-[10px] font-medium animate-pulse">Uploading...</span>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Foto Profil / Avatar</label>
+                <input type="file" wire:model="newAvatar" id="upload-avatar" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                @error('newAvatar') <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> @enderror
+            </div>
+        </div>
+
+        <!-- Baris Input Teks -->
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-            <!-- Diikat menggunakan wire:model -->
             <input type="text" wire:model="name" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
             @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
+        
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Headline Profil</label>
             <input type="text" wire:model="headline" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
             @error('headline') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
+        
         <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">Tentang Saya (About)</label>
             <textarea rows="4" wire:model="about" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"></textarea>
             @error('about') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
-    </div>
-    <div class="mt-6 flex justify-end">
-        <!-- Diaktifkan menggunakan wire:click untuk memicu saveProfile() -->
-        <button wire:click="saveProfile" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-2.5 rounded-xl shadow-md transition">
-            Simpan Profil
-        </button>
-    </div>
+
+        <div class="md:col-span-2 flex justify-end">
+            <!-- Ubah type tombol menjadi submit -->
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-2.5 rounded-xl shadow-md transition">
+                Simpan Profil
+            </button>
+        </div>
+    </form>
 </section>
 
                     <!-- Form Pengalaman Baru -->
