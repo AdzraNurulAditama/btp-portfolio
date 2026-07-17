@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Experience extends Model
+class Project extends Model
 {
     use HasFactory;
+
+    // Menentukan kolom mana saja yang boleh diisi via Form / Mass Assignment
     protected $fillable = [
-        'position',
-        'institution',
-        'period',
+        'name',
         'description',
+        'link',
+        'tech_stack',
     ];
 }
