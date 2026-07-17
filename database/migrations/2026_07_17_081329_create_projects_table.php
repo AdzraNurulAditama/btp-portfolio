@@ -16,7 +16,8 @@ public function up(): void
         $table->string('name');            
         $table->text('description');        
         $table->string('link')->nullable(); 
-        $table->string('tech_stack');       
+        $table->string('tech_stack');  
+        $table->boolean('is_published')->default(true);   
         $table->timestamps();
     });
 }
