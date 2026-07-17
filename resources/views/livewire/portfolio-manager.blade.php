@@ -46,26 +46,41 @@
                 <!-- Kolom Form Konten Dashboard -->
                 <div class="lg:col-span-2 space-y-8">
                     <!-- Form Data Diri -->
-                    <section id="form-profile" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">📝 Ubah Data Diri</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                                <input type="text" value="{{ $profile->name ?? '' }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Headline Profil</label>
-                                <input type="text" value="{{ $profile->headline ?? '' }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Tentang Saya (About)</label>
-                                <textarea rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">{{ $profile->about ?? '' }}</textarea>
-                            </div>
-                        </div>
-                        <div class="mt-6 flex justify-end">
-                            <button class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-2.5 rounded-xl shadow-md transition">Simpan Profil</button>
-                        </div>
-                    </section>
+<section id="form-profile" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+    <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">📝 Ubah Data Diri</h3>
+    
+    <!-- Tampilkan Notifikasi Sukses Jika Ada -->
+    @if (session()->has('message'))
+        <div class="mb-4 p-4 bg-emerald-50 text-emerald-700 text-sm rounded-xl">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+            <!-- Diikat menggunakan wire:model -->
+            <input type="text" wire:model="name" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Headline Profil</label>
+            <input type="text" wire:model="headline" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            @error('headline') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        </div>
+        <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tentang Saya (About)</label>
+            <textarea rows="4" wire:model="about" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"></textarea>
+            @error('about') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        </div>
+    </div>
+    <div class="mt-6 flex justify-end">
+        <!-- Diaktifkan menggunakan wire:click untuk memicu saveProfile() -->
+        <button wire:click="saveProfile" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-2.5 rounded-xl shadow-md transition">
+            Simpan Profil
+        </button>
+    </div>
+</section>
 
                     <!-- Form Pengalaman Baru -->
                     <section id="form-experience" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
