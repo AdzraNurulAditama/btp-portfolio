@@ -467,7 +467,7 @@
                             <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-5 gap-y-2 pt-3 text-xs font-mono text-slate-400 border-t border-slate-50">
                                 <span class="flex items-center gap-1.5 hover:text-slate-600 transition">📧 {{ $profile->email }}</span>
                                 <span class="flex items-center gap-1.5 hover:text-slate-600 transition">📞 {{ $profile->phone }}</span>
-                                <a href="https://github.com/Adzra" target="_blank" class="flex items-center gap-1.5 hover:text-indigo-600 font-bold transition">🌐 github.com/Adzra</a>
+                                <a href="https://github.com/AdzraNurulAditama" target="_blank" class="flex items-center gap-1.5 hover:text-indigo-600 font-bold transition">🌐 github.com/AdzraNurulAditama</a>
                             </div>
                         </div>
                     </section>
