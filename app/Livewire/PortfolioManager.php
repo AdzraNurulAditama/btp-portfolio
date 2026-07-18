@@ -9,56 +9,21 @@ use App\Models\Experience;
 use App\Models\Education;
 use App\Models\Project;
 use App\Models\Skill;
-use Illuminate\Support\Facades\Storage;
+use App\Services\PortfolioService; // Import Service Layer
 
 class PortfolioManager extends Component
 {
     use WithFileUploads;
 
     public $isEditMode = false;
-    
-    // Properti pengendali tab aktif
     public $currentTab = 'profile';
 
-    // Form Data Diri (Profile)
-    public $profileId;
-    public $name;
-    public $headline;
-    public $about;
-    public $email;
-    public $phone;
-    public $avatar;
-    public $newAvatar;
-
-    // Form Pengalaman (Experience)
-    public $selectedExperienceId;
-    public $exp_position;
-    public $exp_institution;
-    public $exp_period;
-    public $exp_description;
-    public $exp_sort_order = 0; // Pindah ke dalam class dengan benar
-
-    // Form Pendidikan (Education)
-    public $selectedEducationId;
-    public $edu_institution;
-    public $edu_degree;
-    public $edu_period;
-    public $edu_description;
-
-    // Form Proyek (Project)
-    public $selectedProjectId;
-    public $proj_name;
-    public $proj_link;
-    public $proj_tech_stack;
-    public $proj_description;
-    public $proj_is_published = true;
-    public $proj_sort_order = 0; // Pindah ke dalam class dengan benar
-
-    // Form Keahlian (Skill)
-    public $selectedSkillId;
-    public $skill_name;
-    public $skill_type = 'skill';
-    public $skill_level;
+    // Form Properti
+    public $profileId, $name, $headline, $about, $email, $phone, $avatar, $newAvatar;
+    public $selectedExperienceId, $exp_position, $exp_institution, $exp_period, $exp_description, $exp_sort_order = 0;
+    public $selectedEducationId, $edu_institution, $edu_degree, $edu_period, $edu_description;
+    public $selectedProjectId, $proj_name, $proj_link, $proj_tech_stack, $proj_description, $proj_is_published = true, $proj_sort_order = 0;
+    public $selectedSkillId, $skill_name, $skill_type = 'skill', $skill_level;
 
     public function mount()
     {
@@ -77,17 +42,16 @@ class PortfolioManager extends Component
     public function toggleEditMode()
     {
         $this->isEditMode = !$this->isEditMode;
-        if ($this->isEditMode) {
-            $this->currentTab = 'profile';
-        }
+        if ($this->isEditMode) { $this->currentTab = 'profile'; }
     }
 
     // ==========================================
-    //            CRUD LOGIC: PROFILE            
+    //      CALLING SERVICE LAYER FOR CRUD
     // ==========================================
-    public function saveProfile()
+    
+    public function saveProfile(PortfolioService $service)
     {
-        $this->validate([
+        $data = $this->validate([
             'name' => 'required|string|max:255',
             'headline' => 'required|string|max:255',
             'about' => 'required|string',
@@ -96,35 +60,17 @@ class PortfolioManager extends Component
             'newAvatar' => $this->newAvatar ? 'image|max:2048' : 'nullable',
         ]);
 
-        $profile = Profile::first() ?? new Profile();
-        
-        if ($this->newAvatar) {
-            if ($profile->avatar && Storage::disk('public')->exists($profile->avatar)) {
-                Storage::disk('public')->delete($profile->avatar);
-            }
-            $profile->avatar = $this->newAvatar->store('avatars', 'public');
-        }
-
-        $profile->name = $this->name;
-        $profile->headline = $this->headline;
-        $profile->about = $this->about;
-        $profile->email = $this->email;
-        $profile->phone = $this->phone;
-        $profile->save();
+        $profile = $service->updateProfile($data, $this->newAvatar);
 
         $this->profileId = $profile->id;
         $this->avatar = $profile->avatar;
         $this->newAvatar = null;
-        
-        session()->flash('message', 'Profil berhasil diperbarui!');
+        session()->flash('message', 'Profil berhasil diperbarui via Service Layer!');
     }
 
-    // ==========================================
-    //          CRUD LOGIC: EXPERIENCE           
-    // ==========================================
-    public function saveExperience()
+    public function saveExperience(PortfolioService $service)
     {
-        $this->validate([
+        $data = $this->validate([
             'exp_position' => 'required|string|max:255',
             'exp_institution' => 'required|string|max:255',
             'exp_period' => 'required|string|max:255',
@@ -132,19 +78,7 @@ class PortfolioManager extends Component
             'exp_sort_order' => 'required|integer',
         ]);
 
-        if ($this->selectedExperienceId) {
-            $exp = Experience::find($this->selectedExperienceId);
-        } else {
-            $exp = new Experience();
-        }
-
-        $exp->position = $this->exp_position;
-        $exp->institution = $this->exp_institution;
-        $exp->period = $this->exp_period;
-        $exp->description = $this->exp_description;
-        $exp->sort_order = $this->exp_sort_order; // Simpan urutan manual
-        $exp->save();
-
+        $service->saveExperience($data, $this->selectedExperienceId);
         $this->resetExperienceForm();
         session()->flash('message', 'Data pengalaman berhasil disimpan!');
     }
@@ -157,7 +91,7 @@ class PortfolioManager extends Component
         $this->exp_institution = $exp->institution;
         $this->exp_period = $exp->period;
         $this->exp_description = $exp->description;
-        $this->exp_sort_order = $exp->sort_order; // Isi state edit
+        $this->exp_sort_order = $exp->sort_order;
     }
 
     public function deleteExperience($id)
@@ -169,31 +103,20 @@ class PortfolioManager extends Component
     public function resetExperienceForm()
     {
         $this->selectedExperienceId = null;
-        $this->exp_position = '';
-        $this->exp_institution = '';
-        $this->exp_period = '';
-        $this->exp_description = '';
-        $this->exp_sort_order = 0; // Reset ke default
+        $this->exp_position = ''; $this->exp_institution = ''; $this->exp_period = ''; $this->exp_description = ''; $this->exp_sort_order = 0;
     }
 
-    // ==========================================
-    //           CRUD LOGIC: EDUCATION           
-    // ==========================================
-    public function saveEducation()
+    public function saveEducation(PortfolioService $service)
     {
-        $this->validate([
+        $data = $this->validate([
             'edu_institution' => 'required|string|max:255',
             'edu_degree' => 'required|string|max:255',
             'edu_period' => 'required|string|max:255',
         ]);
 
-        $edu = $this->selectedEducationId ? Education::find($this->selectedEducationId) : new Education();
-        $edu->institution = $this->edu_institution;
-        $edu->degree = $this->edu_degree;
-        $edu->period = $this->edu_period;
-        $edu->description = $this->edu_description;
-        $edu->save();
+        $data['edu_description'] = $this->edu_description;
 
+        $service->saveEducation($data, $this->selectedEducationId);
         $this->resetEducationForm();
         session()->flash('message', 'Data pendidikan berhasil disimpan!');
     }
@@ -204,7 +127,7 @@ class PortfolioManager extends Component
         $this->selectedEducationId = $edu->id;
         $this->edu_institution = $edu->institution;
         $this->edu_degree = $edu->degree;
-        $this->edu_period = $edu->period;
+        $edu->period = $edu->period;
         $this->edu_description = $edu->description;
     }
 
@@ -217,33 +140,22 @@ class PortfolioManager extends Component
     public function resetEducationForm()
     {
         $this->selectedEducationId = null;
-        $this->edu_institution = '';
-        $this->edu_degree = '';
-        $this->edu_period = '';
-        $this->edu_description = '';
+        $this->edu_institution = ''; $this->edu_degree = ''; $this->edu_period = ''; $this->edu_description = '';
     }
 
-    // ==========================================
-    //            CRUD LOGIC: PROJECT            
-    // ==========================================
-    public function saveProject()
+    public function saveProject(PortfolioService $service)
     {
-        $this->validate([
+        $data = $this->validate([
             'proj_name' => 'required|string|max:255',
             'proj_tech_stack' => 'required|string|max:255',
             'proj_description' => 'required|string',
             'proj_sort_order' => 'required|integer',
         ]);
+        
+        $data['proj_link'] = $this->proj_link;
+        $data['proj_is_published'] = $this->proj_is_published;
 
-        $proj = $this->selectedProjectId ? Project::find($this->selectedProjectId) : new Project();
-        $proj->name = $this->proj_name;
-        $proj->link = $this->proj_link;
-        $proj->tech_stack = $this->proj_tech_stack;
-        $proj->description = $this->proj_description;
-        $proj->is_published = $this->proj_is_published;
-        $proj->sort_order = $this->proj_sort_order; // Simpan urutan manual
-        $proj->save();
-
+        $service->saveProject($data, $this->selectedProjectId);
         $this->resetProjectForm();
         session()->flash('message', 'Data proyek berhasil disimpan!');
     }
@@ -254,10 +166,10 @@ class PortfolioManager extends Component
         $this->selectedProjectId = $proj->id;
         $this->proj_name = $proj->name;
         $this->proj_link = $proj->link;
-        $proj->tech_stack = $proj->tech_stack;
-        $proj->description = $proj->description;
+        $this->proj_tech_stack = $proj->tech_stack;
+        $this->proj_description = $proj->description;
         $this->proj_is_published = $proj->is_published;
-        $this->proj_sort_order = $proj->sort_order; // Isi state edit
+        $this->proj_sort_order = $proj->sort_order;
     }
 
     public function deleteProject($id)
@@ -269,31 +181,18 @@ class PortfolioManager extends Component
     public function resetProjectForm()
     {
         $this->selectedProjectId = null;
-        $this->proj_name = '';
-        $this->proj_link = '';
-        $this->proj_tech_stack = '';
-        $this->proj_description = '';
-        $this->proj_is_published = true;
-        $this->proj_sort_order = 0; // Reset ke default
+        $this->proj_name = ''; $this->proj_link = ''; $this->proj_tech_stack = ''; $this->proj_description = ''; $this->proj_is_published = true; $this->proj_sort_order = 0;
     }
 
-    // ==========================================
-    //             CRUD LOGIC: SKILL             
-    // ==========================================
-    public function saveSkill()
+    public function saveSkill(PortfolioService $service)
     {
-        $this->validate([
+        $data = $this->validate([
             'skill_name' => 'required|string|max:255',
             'skill_type' => 'required|in:skill,certification',
             'skill_level' => 'required|string|max:255',
         ]);
 
-        $sk = $this->selectedSkillId ? Skill::find($this->selectedSkillId) : new Skill();
-        $sk->name = $this->skill_name;
-        $sk->type = $this->skill_type;
-        $sk->level = $this->skill_level;
-        $sk->save();
-
+        $service->saveSkill($data, $this->selectedSkillId);
         $this->resetSkillForm();
         session()->flash('message', 'Data keahlian/sertifikasi berhasil disimpan!');
     }
@@ -316,9 +215,7 @@ class PortfolioManager extends Component
     public function resetSkillForm()
     {
         $this->selectedSkillId = null;
-        $this->skill_name = '';
-        $this->skill_type = 'skill';
-        $this->skill_level = '';
+        $this->skill_name = ''; $this->skill_type = 'skill'; $this->skill_level = '';
     }
 
     #[\Livewire\Attributes\Layout('layouts.app')]
@@ -326,10 +223,8 @@ class PortfolioManager extends Component
     {
         return view('livewire.portfolio-manager', [
             'profile' => Profile::first(),
-            // Diurutkan berdasarkan sort_order terkecil lebih dulu
             'experiences' => Experience::orderBy('sort_order', 'asc')->latest()->get(),
             'educations' => Education::all(),
-            // Hanya tampilkan proyek yang dipublish & diurutkan berdasarkan sort_order
             'projects' => Project::where('is_published', true)->orderBy('sort_order', 'asc')->latest()->get(),
             'skills' => Skill::where('type', 'skill')->get(),
             'certifications' => Skill::where('type', 'certification')->get(),
