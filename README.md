@@ -31,3 +31,9 @@ Jalankan migrasi untuk menyusun skema tabel database terbaru sekaligus memasukka
 Nyalakan server lokal Laravel untuk menjalankan dan menguji aplikasi:
 **php artisan serve**
 Kemudian website siap diakses melalui browser di alamat http://127.0.0.1:8000.
+8. Kompilasi Aset Frontend (Tailwind & Vite)
+Karena proyek ini menggunakan Tailwind CSS via Vite, kita wajib mengompilasi aset frontend agar tampilan halaman portofolio tidak memicu error manifest not found dan terformat dengan rapi. Buka jendela terminal baru, lalu jalankan perintah berikut:
+# Mengunduh dependensi Node.js (jalankan sekali di awal)
+npm install
+# Menjalankan server pengembangan Vite secara real-time
+npm run dev
