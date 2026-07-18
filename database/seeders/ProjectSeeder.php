@@ -26,7 +26,7 @@ class ProjectSeeder extends Seeder
         Project::create([
             'name' => 'Website Rumah Kost',
             'description' => 'Mengembangkan website rumah kost khusus putri untuk mencari informasi kamar, fasilitas, harga sewa, dan kontak pemilik. Dilengkapi fitur CRUD manajemen data kost dan optimasi Google Search Console.',
-            'link' => null,
+            'link' => 'https://www.rumahkostputri.com/',
             'tech_stack' => 'Laravel, MySQL, Google Search Console'
         ]);
 
